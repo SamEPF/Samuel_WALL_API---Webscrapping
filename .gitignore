@@ -1,0 +1,48 @@
+# Ignore data folder
+src/data/
+
+# Ignore Python bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore environment files
+.env
+*.env
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore virtual environment folders
+venv/
+env/
+
+# Ignore logs
+*.log
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore compiled C extensions
+*.so
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+
+# Ignore test coverage results
+.coverage
+*.cover
+*.coverage.*
+.cache/
+coverage/
+
+# Ignore distribution and build folders
+build/
+dist/
+*.egg-info/
+
+# Ignore temporary files
+*.swp
+*.swo
