@@ -6,9 +6,12 @@ from sklearn.model_selection import train_test_split
 import kagglehub
 import joblib
 import json
+from pydantic import BaseModel
 from sklearn.ensemble import RandomForestClassifier
 
 router = APIRouter()
+class PredictionInput(BaseModel):
+    data: list
 
 @router.get("/download-dataset")
 def download_csv(destination="src/data"):
@@ -118,3 +121,59 @@ def train_model():
         return {"error": "Training dataset not found. Please split the dataset first."}
     except Exception as e:
         return {"error": f"An error occurred while training the model: {str(e)}"}
+    
+
+@router.post("/predict")
+def predict(input_data: PredictionInput):
+    """
+    Makes predictions with the trained model and input data.
+    """
+    model_filepath = "src/models/model.pkl"
+    try:
+        # Load the trained model
+        model = joblib.load(model_filepath)
+        
+        # Convert input data to DataFrame
+        input_df = pd.DataFrame(input_data.data)
+        
+        # Validate that all input data are numeric
+        if not all(input_df.applymap(lambda x: isinstance(x, (int, float)))):
+            raise ValueError("All input data must be numeric.")
+        
+        # Make predictions
+        predictions = model.predict(input_df)
+        
+        # Return predictions as JSON
+        return {"predictions": predictions.tolist()}
+    except FileNotFoundError:
+        return {"error": "Trained model not found. Please train the model first."}
+    except ValueError as ve:
+        return {"error": f"Invalid input data: {ve}"}
+    except Exception as e:
+        return {"error": f"An error occurred while making predictions: {str(e)}"}
+
+
+@router.get("/predict-test-data")
+def predict_test_data():
+    """
+    Makes predictions with the trained model using the test dataset.
+    """
+    test_filepath = "src/data/test.csv"
+    model_filepath = "src/models/model.pkl"
+    try:
+        # Load the test dataset
+        test_df = pd.read_csv(test_filepath)
+        X_test = test_df.drop("Species", axis=1)
+        
+        # Load the trained model
+        model = joblib.load(model_filepath)
+        
+        # Make predictions on the test data
+        predictions = model.predict(X_test)
+        
+        # Return predictions as JSON
+        return {"predictions": predictions.tolist()}
+    except FileNotFoundError:
+        return {"error": "Test dataset or trained model not found. Please ensure both are available."}
+    except Exception as e:
+        return {"error": f"An error occurred while making predictions: {str(e)}"}
