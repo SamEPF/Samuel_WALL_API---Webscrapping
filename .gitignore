@@ -46,3 +46,5 @@ dist/
 # Ignore temporary files
 *.swp
 *.swo
+# Ignore Firebase service account credentials
+/Users/samwall/Documents/5A/Samuel_WALL_API---Webscrapping/TP2 and  3/services/epf-flower-data-science/samuel-wall-webscrapping-firebase-adminsdk-w91wx-815590037f.json
