@@ -61,7 +61,6 @@ def process_dataset():
         if "species" in df.columns:
             df["species"] = df["species"].astype("category").cat.codes
         
-        # Save the processed dataset
         processed_filepath = "src/data/processed_iris.csv"
         df.to_csv(processed_filepath, index=False)
         
@@ -81,7 +80,6 @@ def split_dataset():
         df = pd.read_csv(filepath)
         train, test = train_test_split(df, test_size=0.2, random_state=42)
         
-        # Save the split datasets
         train.to_csv("src/data/train.csv", index=False)
         test.to_csv("src/data/test.csv", index=False)
         
@@ -98,23 +96,23 @@ def train_model():
     """
     train_filepath = "src/data/train.csv"
     try:
-        # Load the training dataset
+
         df = pd.read_csv(train_filepath)
         X = df.drop("Species", axis=1)
         y = df["Species"]
         
-        # Load model parameters from JSON file
+     
         with open("src/config/model_parameters.json", "r") as f:
             params = json.load(f)
         
-        # Initialize and train the model
+   
         model = RandomForestClassifier(**params)
         model.fit(X, y)
         
-        # Ensure the models directory exists
+       
         os.makedirs("src/models", exist_ok=True)
         
-        # Save the trained model
+
         joblib.dump(model, "src/models/model.pkl")
         return {"message": "Model trained and saved successfully."}
     except FileNotFoundError:
@@ -122,7 +120,7 @@ def train_model():
     except Exception as e:
         return {"error": f"An error occurred while training the model: {str(e)}"}
     
-
+# Making predictions with any given data
 @router.post("/predict")
 def predict(input_data: PredictionInput):
     """
@@ -130,20 +128,19 @@ def predict(input_data: PredictionInput):
     """
     model_filepath = "src/models/model.pkl"
     try:
-        # Load the trained model
+     
         model = joblib.load(model_filepath)
         
-        # Convert input data to DataFrame
-        input_df = pd.DataFrame(input_data.data)
         
-        # Validate that all input data are numeric
+        input_df = pd.DataFrame(input_data.data)
+     
         if not all(input_df.applymap(lambda x: isinstance(x, (int, float)))):
             raise ValueError("All input data must be numeric.")
         
-        # Make predictions
+     
         predictions = model.predict(input_df)
         
-        # Return predictions as JSON
+       
         return {"predictions": predictions.tolist()}
     except FileNotFoundError:
         return {"error": "Trained model not found. Please train the model first."}
@@ -152,7 +149,7 @@ def predict(input_data: PredictionInput):
     except Exception as e:
         return {"error": f"An error occurred while making predictions: {str(e)}"}
 
-
+# Testing the predict on the test data
 @router.get("/predict-test-data")
 def predict_test_data():
     """
@@ -161,17 +158,17 @@ def predict_test_data():
     test_filepath = "src/data/test.csv"
     model_filepath = "src/models/model.pkl"
     try:
-        # Load the test dataset
+        
         test_df = pd.read_csv(test_filepath)
         X_test = test_df.drop("Species", axis=1)
         
-        # Load the trained model
+   
         model = joblib.load(model_filepath)
         
-        # Make predictions on the test data
+       
         predictions = model.predict(X_test)
         
-        # Return predictions as JSON
+   
         return {"predictions": predictions.tolist()}
     except FileNotFoundError:
         return {"error": "Test dataset or trained model not found. Please ensure both are available."}
